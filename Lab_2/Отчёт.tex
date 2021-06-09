@@ -1,0 +1,450 @@
+\documentclass[a4paper,14pt]{article}
+%\usepackage[utf8]{inputenc}
+
+\usepackage{cmap} % поиск в PDf
+\usepackage{mathtext} % русские буквы в формулах
+\usepackage[T2A]{fontenc} %  кодировка
+\usepackage[utf8]{inputenc} % кодировка исходного текста
+\usepackage[english,russian]{babel} % локализация и переносы
+\usepackage{soulutf8} 
+\usepackage{hyperref} % Ссылки на текст, формулы
+
+% Макрос для удобной записи углов----------------
+\def\ang#1#2{$#1^\circ\,#2'$} 
+% ang{grad}{min}
+%------------------------------------------------
+
+% Вставка рисунков ------------------------------
+\usepackage{graphicx} % вставка рисунков
+\graphicspath{ {./images/} }
+% -----------------------------------------------
+\usepackage{extsizes} % для 14-го шрифта
+\usepackage{setspace}
+\singlespacing % междустрочной интервал = 1
+\setstretch{1.15} % scale = 1.15
+
+\newcommand\indent[1][1cm]{\hspace*{#1}}
+
+\usepackage{geometry} % Поля
+\geometry{top=20mm}
+\geometry{bottom=20mm}
+\geometry{left=20mm}
+\geometry{right=20mm}
+
+\usepackage{fancyhdr} % колонтитулы
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0mm} % толщина линей
+
+\title{MSGGO-Lab2}
+\author{Андрей Юрьевич Будо }
+\date{March 2021}
+
+\usepackage{multicol}
+
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
+\usepackage{icomma}
+
+\usepackage{hyperref}
+\usepackage[usenames,dvipnames,svgnames,indentle,rgb]{xcolor}
+\hypersetup{
+    unicode=true, %
+    colorlinks=true,
+    linkcolor=blue
+}
+
+\usepackage{bm}
+
+\begin{document}
+    
+    \thispagestyle{empty}
+    \begin{center}
+        МИНИСТЕРСТВО ОБРАЗОВАНИЯ РЕСПУБЛИКИ БЕЛАРУСЬ\\
+        Белорусский Национальный Технический Университет\\
+        Факультет транспортных коммуникаций\\
+        Кафедра "Геодезия и аэрокосмические геотехнологии"
+    \end{center}
+    \begin{center}
+        \vspace{13ex}
+        ОТЧЁТ\\
+        по лабораторной работе №2\\
+        <<Прямая и обратная геодезические задачи на эллипсоиде>>\\
+        Вариант 3
+    \end{center}
+    \begin{flushright}
+        \vspace{13ex}
+        Выполнил: \textit{Вишняков Д.Н.,\\
+        студент группы 11405118}\\
+        \vspace{5ex}
+        Проверил: \textit{Будо А.Ю.,\\
+        ст.пр.каф."ГиАКГТ"}\\
+    \end{flushright}
+    \begin{center}
+        \vfill
+        Минск, 2021
+    \end{center}
+
+\newpage
+\section{Общие сведения}
+\indent Главные геодезические задачи. Главными называют прямую и обратную геодезические
+задачи. Пример прямой задачи – известны широта и долгота пункта А, азимут на пункт В и
+расстояние до него; найти широту и долготу пункта В. Обратная задача – известны широта идолгота пунктов А и В, найти расстояние между ними, прямой и обратный азимуты. Рассмотрим их решение на сфере, а затем на эллипсоиде вращения. Для многих картографических задач решения на сфере по точности являются приемлемыми. Однако в настоящее время системы спутникового позиционирования позволяют определять координаты точек с погрешностями от нескольких метров до первых сантиметров. Поэтому целесообразно иметь представление и о более точных способах решения главных геодезических задач.\\
+\begin{figure}[h]
+    \centering
+    \hypertarget{table1}{\includegraphics[width = 90mm]{images/Ellipsoid.jpg}}
+    \caption{Земной эллипсоид вращения}
+    \label{fig:my_label}
+\end{figure}
+
+\indent В данной задаче рассматривается эллипсоид WGS84 со следующими параметрами:
+\begin{itemize}
+    \item a = 6 378 137 - экваториальная (большая) полуось
+    \item b = 6 356 863,018773 - полярная (малая) полуось
+    \item a = \textit{f} = $\frac{a-b}{a} = \frac{1}{298.3}$ - полярное сжатие
+    \item $\frac{1}{a} = \frac{1}{f} = \frac{a}{a-b} = 298.257223563$ - обратное сжатие\\
+\end{itemize}
+
+\begin{table}[h]
+    \centering
+    \caption{Исходные данные}
+    \begin{tabular}{ |c|c|c|c| }
+    \hline
+         \textbf{№ п/п} & \textbf{Город} & \textbf{Широта, с.ш. \bm{$\phi$}} & \textbf{Долгота, в.д. \bm{$\lambda$}} \\
+         \hline
+         12 & Брест & \ang{52}{06} & \ang{23}{42} \\
+         \hline
+         13 & Высокое & \ang{52}{06} & \ang{23}{24} \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\indent Для решения прямой и обратной задач на эллипсоиде воспользуемся формулами со средними аргументами (предложены К.Ф. Гауссом)
+
+\newpage
+\section{Обратная геодезическая задача на эллипсоиде}
+Чтобы при решении геодезических задач на эллипсоиде формулы имели более компнактный вид, введём ряд обозначений:
+
+\begin{equation}
+    \hypertarget{f_1}{f_1 = \frac{1}{M}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_2}{f_2 = \frac{1}{N}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_3}{f_3 = \frac{1}{24}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_4}{f_4 = \frac{1 + \eta^2 - 9 \cdot \eta^2 \cdot t^2}{24 \cdot V^4}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_5}{f_5 = \frac{1 - 2 \cdot \eta^2}{24}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_6}{f_6 = \frac{\eta^2 \cdot (1 - t^2) }{8 \cdot V^4}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_7}{f_7 = \frac{1 + \eta^2}{12}}
+\end{equation}
+
+\begin{equation}
+    \hypertarget{f_8}{f_8 = \frac{3 + 8 \cdot \eta^2}{24 \cdot V^4}}
+\end{equation}
+
+\indent При решении задачи обозначим широту и долготу начальных точек (\hyperlink{table1}{Табл. 1}) как:
+
+\begin{center}
+    $P_1(\phi_1, \lambda_1)$ $P_2(\phi_2, \lambda_2)$\\
+\end{center}
+
+\indent Вычисляем разности широт и долгот, а также среднее значение широты:
+
+\begin{equation}
+    \Delta\phi = \phi_2 - \phi_1
+\end{equation}
+
+\begin{equation}
+    \Delta\lambda = \lambda_2 - \lambda_1
+\end{equation}
+
+\begin{equation}
+    \phi = \frac{\phi_1 + \phi_2}{2}
+\end{equation}
+
+\indent Полученные значения:
+
+\begin{center}
+    $\Delta\phi =0.000291^\circ$ \\
+   $\Delta\lambda = -0.005236^\circ$ \\
+   $\phi = 0.909462^\circ$\\
+\end{center}
+
+\indent Далее вычисляем радиусы кривизны первого вертикала и меридиана:
+
+\begin{equation}
+    N = \frac{a}{\sqrt{1 - e^2 \cdot (\sin{\phi})}}
+\end{equation}
+
+\begin{equation}
+    M = \frac{a \cdot (1 - e^2)}{(1 - e^2 \cdot \sin^2{\phi})^\frac{3}{2}}
+\end{equation}
+
+где е - квадрат эксцентриситета:
+
+\begin{equation}
+    e^2 = 2 \cdot f - f^2
+\end{equation}
+а, \textit{f} - параметры эллипсоида;\\
+а также вспомогательные величины:
+
+\begin{equation}
+    t = \tan{\phi}
+\end{equation}
+
+\begin{equation}
+    \eta^2 = \frac{e^2}{1 - e^2} \cdot \cos^2{\phi}
+\end{equation}
+
+\begin{equation}
+    V^2 = 1 + \eta^2
+\end{equation}
+
+\indent и функции \textit{$f_1$} \textit{$f_2$} по формулам (\hyperlink{f_1}{1}) - (\hyperlink{f_8}{8})
+
+\indent Полученные значения:
+\begin{center}
+    $N = 6391474.662172 \textit{м}$\\
+    $M = 6375267.622755 \textit{м}$\\
+    e = 0.081819\\
+    t = 1.284942\\
+    $\eta^2 = 0.002542$\\
+    $V^2 = 1.002542$\\
+\end{center}
+
+\indent Вычисляем три вспомогательные величины
+
+\begin{center}
+    $S \cdot \sin{\alpha}$, $S \cdot \cos{\alpha}$, $\Delta\alpha$
+\end{center}
+
+по формулам:
+
+\begin{equation}
+    S \cdot \sin{\alpha} = \frac{1}{f_2} \cdot \Delta\lambda \cdot \cos{\phi} \cdot \left(1 - f_3 \cdot (\Delta\lambda \cdot \sin{\phi})^2 + f_4 \cdot (\Delta\phi)^2 \right) 
+\end{equation}
+
+\begin{equation}
+    S \cdot \cos{\alpha} = \frac{1}{f_1} \cdot \Delta\phi \cdot \cos{\left(\frac{\Delta\lambda}{2}\right)} \cdot \left(1 + f_5 \cdot (\Delta\lambda \cdot \cos{\phi})^2 + f_6 \cdot (\Delta\phi)^2 \right)
+\end{equation}
+
+\begin{equation}
+    \Delta\alpha =  \Delta\lambda \cdot \sin{\phi} \cdot \left(1 + f_7 \cdot (\Delta\lambda \cdot \cos{\phi})^2 + f_8 \cdot (\Delta\phi)^2 \right)
+\end{equation}
+
+\indent Полученные значения:
+
+\begin{center}
+    $S \cdot \sin{\alpha} = -20553.618276^\circ$\\
+    $S \cdot \cos{\alpha} = 1854.484618^\circ$\\
+    $\Delta\alpha = -0.236752^\circ$\\
+\end{center}
+
+\indent По вычисленным значениям вычисляем окончательные значения исходных величин.\\
+\indent Длина геодезической линии:
+
+\begin{equation}
+    S = \sqrt{\left(S \cdot \sin{\alpha} \right) + \left(S \cdot \cos{\alpha} \right)}
+\end{equation}
+
+\indent Величина азимута стандартно, т.е. как румб с учётом четверти:
+
+\begin{equation}
+    \alpha = \arctan\left (\left|\frac{S \cdot \sin{\alpha}}{S \cdot \cos{\alpha}} \right| \right)
+\end{equation}
+
+\begin{equation}
+    \alpha_1 = \alpha - \frac{\Delta\alpha}{2}
+\end{equation}
+
+\begin{equation}
+    \alpha_2 = \alpha + \frac{\Delta\alpha}{2} + \pi
+\end{equation}
+
+\indent Значение азимутов должно находиться в интервале
+
+\begin{center}
+    $0 \leqslant \alpha \leqslant 2 \pi$
+\end{center}
+
+\indent Полученные значения:
+\begin{center}
+    $S = 20637.110685 \textit{м}$\\
+    $\alpha = 275.155647^\circ$\\
+    $\alpha_1 = 275.274024^\circ$\\
+    $\alpha_2 = 95.037272^\circ$\\
+\end{center}
+
+\newpage
+\section{Прямая геодезическая задача на эллипсоиде}
+В качестве исходных данных  имеем широту и долготу первой точки (\hyperlink{table_1}{Табл.1}), а также вычисленные значения прямого азимута и геодезической линии:
+
+\begin{center}
+    $P_1(\phi_1, \lambda_1)$, $\alpha_1$, S\\
+\end{center}
+
+\indent Широту и долготу второй точки, а также обратный азимут геодезической линии обозначим соответственно:
+
+\begin{center}
+    $P_2(\phi_2, \lambda_2)$, $\alpha_1$, $\alpha_2$\\
+\end{center}
+
+\indent Вычисляем приблизительные координаты точки $P_2$:
+
+\begin{equation}
+    \phi_2 = \phi_1 + \frac{S \cdot \cos{\alpha_1}}{M_1}
+\end{equation}
+
+\begin{equation}
+    \lambda_2 = \lambda_1 + \frac{S \cdot \alpha_1}{N_1 \cdot \cos{\phi_1}}
+\end{equation}
+
+\indent Далее в ходе итерационного процесса вычисляются обратный азимут, широта и долгота второй точки по формулам:
+
+\begin{equation}
+    \Delta\lambda = \Delta\lambda \cdot \sin{\phi} \cdot \left (1 + f_7 \cdot (\Delta\lambda \cdot \cos{\phi})^2 + f_8 \cdot (\Delta\phi)^2 \right)
+\end{equation}
+
+\begin{equation}
+    \alpha = \alpha_1 + \frac{\Delta\lambda}{2}
+\end{equation}
+
+\begin{equation}
+    \alpha_2 = \alpha + \frac{\Delta\alpha}{2} + \pi
+\end{equation}
+
+\begin{equation}
+    \lambda_1 + f_2 \cdot \frac{S \cdot \sin{\alpha}}{\cos{\phi}} \cdot \left(1 + f_3 \cdot (\Delta\lambda \cdot \sin{\phi})^2 - f_4 \cdot (\Delta\phi)^2 \right)
+\end{equation}
+
+\begin{equation}
+    \phi_2 = \phi_1 + f_1 \cdot \frac{S \cdot \cos{\alpha}}{\cos{\frac{\Delta\lambda}{2}}} \cdot \left (1 - f_5 \cdot (\Delta\lambda \cdot \cos{\phi})^2 - f_6 \cdot (\Delta\phi)^2 \right)
+\end{equation}
+
+\indent Перед началом каждой итерации перевычисляются значения (\hyperlink{f_1}{1}) - (\hyperlink{f_8}{8}). Итерации следует продолжать до тех пор, пока значения текущей и предыдущей итерации не будут отличаться на пренебрегаемо малую величину, которая зависит от вида выполняемых работ. Результаты \hyperlink{table_2}{Табл.2} подведены за 3 итерационных цикла.
+
+\begin{table}[h]
+    \centering
+    \hypertarget{table_2}{\caption{Журнал итераций}}
+    \begin{tabular}{|c|c|c|c|}
+    \hline
+         $\textbf{Величина}$ & $\textbf{Итерация №1}$ & $\textbf{Итерация №2}$ & $\textbf{Итерация №}$  \\
+         \hline
+         $\Delta\alpha, ^\circ$ & -0.236664 & -0.236753=& -0.236752\\
+         \hline
+         $\alpha, ^\circ$ & 275.155692 & 275.155647 & 275.155647\\
+         \hline
+         $\alpha_2, ^\circ$ & 95.037360 & 95.037270 & 95.037271\\
+         \hline
+         $\lambda, ^\circ$ & 23.399999 & 23.399999 & 23.400000\\
+         \hline
+         $\phi, ^\circ$ & 52.116667 & 52.116667 & 52.116667\\
+         \hline
+    \end{tabular}
+    \label{tab:my_label}
+\end{table}
+
+\indent Проверим правильность вычислений, выполнив обратный пересчёт по формулам параметрического способо описания эллипсоида.\\
+
+\newpage
+\section{Параметрический способ описания эллипсоида}
+Эллипсоид WGS84 параметрически можно представить в виде формулы:
+
+\begin{gather}
+    \begin{pmatrix} x \\ y \\ z \end{pmatrix} = 
+    \begin{pmatrix}
+        N(\phi) \cdot \cos\phi \cdot \cos\lambda\\
+        N(\phi) \cdot \cos\phi \cdot \sin\lambda\\
+        N(\phi) (1 - e^2) \cdot \sin\phi
+    \end{pmatrix}
+\end{gather}
+
+где первый вертикал $N(\phi)$ :
+
+\begin{equation}
+    N(\phi) = \frac{a}{\sqrt{1 - e^2 \sin^2{\phi}}}
+\end{equation}
+
+и эксцентриситет:
+
+\begin{equation}
+    \hypertarget{f_34}{e = \frac{\sqrt{a^2 - b^2}}{a} \Rightarrow e^2 = 2f - f^2}
+\end{equation}
+
+\indent Для точек над поверхностью эллипсоида необходимо в формуле (\hyperlink{f_34}{34}) добавить эллипосидальную высоту h (расстояние от точки до эллипсоида по нормали):
+
+\begin{gather}
+    \begin{pmatrix} x \\ y \\ z \end{pmatrix} = 
+    \begin{pmatrix}
+        (N+h) \cdot \cos\phi \cdot \cos\lambda\\
+        (N+h) \cdot \cos\phi \cdot \sin\lambda\\
+        (N(1 - e^2) +h) \cdot \sin\phi
+    \end{pmatrix}
+\end{gather}
+
+\indent Для вычисления геодезических координат по пространственным прямоугольным можно испольховать формулы:
+
+\begin{equation}
+    \lambda = \arctan \left(\frac{Y}{X} \right)
+\end{equation}
+
+\begin{equation}
+    \phi = \arctan \frac{Z + \varepsilon \cdot b \cdot \sin^3{q}}{p - e^2 \cdot a \cdot \cos^3{q}}
+\end{equation}
+
+где
+
+\begin{equation}
+   \varepsilon = \frac{e^2}{1 - e^2} 
+\end{equation}
+
+\begin{equation}
+    b = a \cdot (1 - f)
+\end{equation}
+
+\begin{equation}
+    p = \left (X^2 + Y^2 \right)^0,5
+\end{equation}
+
+\begin{equation}
+    q = \arctan \left(\frac{Z \cdot a}{p \cdot b} \right)
+\end{equation}
+
+\indent Затем эллипсоидальная высота может быть найдена по формуле:
+
+\begin{equation}
+    h = \frac{p}{\cos{\phi}} - \nu
+\end{equation}
+
+\indent Полученные значения:
+
+\begin{center}
+     $X_1 = 3595062.049446 \textit{м}$ $ X_2 = 3601932.611383 \textit{м}$\\
+     $Y_1 = 1578121.906722 \textit{м}$ $Y_2 = 1558695.427717 \textit{м}$ \\ 
+     $Z_1 = 5009646.051168 \textit{м}$ $Z_2 = 5010785.024187 \textit{м}$\\
+     
+     $\varepsilon = 0.006739$\\
+     $b = 6356752.3142458 \textit{м}$\\
+     $p_1 = 3926186.431111^\circ$ $p_2 = 3924722.916758^\circ$\\
+     $q_1 = 0.907688^\circ$ $q_2 = 0.907979^\circ$\\
+     $\lambda_1 = 23.700000^\circ$ $\lambda_2 = 23.400000^\circ$\\
+     $\phi_1 = 52.100000^\circ$ $\phi_2 = 52.116667^\circ$\\
+     $S_\textit{геоц} = 20637.101720 \textit{м}$
+\end{center}
+
+\indent Вычислив разницу полученных значений, равную 0.008965 \textit{м} (8 мм). Из этого можно сделать вывод, что расстояние на сфере незначительно больше расстояния на эллипсоиде. Данная разница обусловлена особенностями фигур сферы (нормальный сфероид) и эллипсоида вращения (сплюснутый сфероид).
+
+\end{document}
